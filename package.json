@@ -5,6 +5,10 @@
   "main": "index.js",
   "author": "Dean Peter",
   "license": "MIT",
+  "engines": {
+    "node": "16.13.1",
+    "npm": "8.1.2"
+  },
   "scripts": {
     "dev": "yarn prebuild && wp --env dev",
     "dev:bundleanalyzer": "yarn prebuild && yarn dev --addons bundleanalyzer",
