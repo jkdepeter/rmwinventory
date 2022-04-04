@@ -10,6 +10,7 @@
     "npm": "8.1.2"
   },
   "scripts": {
+    "start": "node src/Server.js",
     "dev": "yarn prebuild && wp --env dev",
     "dev:bundleanalyzer": "yarn prebuild && yarn dev --addons bundleanalyzer",
     "prebuild": "rimraf dist",
@@ -31,6 +32,8 @@
     "axios": "^0.26.0",
     "babel-polyfill": "^6.26.0",
     "clean-webpack-plugin": "^4.0.0",
+    "cross-env": "^7.0.3",
+    "express": "^4.17.3",
     "faker": "^5.5.3",
     "firebase": "^9.6.8",
     "image-webpack-loader": "^2.0.0",
@@ -44,8 +47,7 @@
     "recharts": "^2.1.9",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^2.0.3",
-    "styled-components": "^5.3.3",
-    "cross-env": "^7.0.3"
+    "styled-components": "^5.3.3"
   },
   "devDependencies": {
     "@babel/core": "^7.15.5",
