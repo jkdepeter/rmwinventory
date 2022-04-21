@@ -70,6 +70,10 @@ const config = {
       },
     ],
   },
+  resolve : {
+    fallback:{ "stream": require.resolve("stream-browserify") }
+
+  },
   plugins: [
     new ReactRefreshWebpackPlugin({
       overlay: { sockIntegration: 'wps' },

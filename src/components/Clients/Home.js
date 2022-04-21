@@ -1,5 +1,4 @@
 import * as React from 'react';
-//import {useAuth0} from "@auth0/auth0-react"
 import { styled, createTheme, ThemeProvider,alpha  } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import MuiDrawer from '@mui/material/Drawer';
@@ -15,8 +14,6 @@ import Grid from '@mui/material/Grid';
 import TablePagination from '@mui/material/TablePagination';
 import TableContainer from '@mui/material/TableContainer';
 import List from '@mui/material/List';
-//import Popper from '@mui/material/Popper';
-//import AppBar from '@mui/material/AppBar';
 import MenuItem from '@mui/material/MenuItem';
 import Toolbar from '@mui/material/Toolbar';
 import Menu from '@mui/material/Menu';
@@ -34,7 +31,7 @@ import Tooltip from '@mui/material/Tooltip';
 import Avatar from '@mui/material/Avatar';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import { mainListItems, secondaryListItems } from './SideBar';
+import { MainListItems, secondaryListItems } from './SideBar';
 import SearchIcon from '@mui/icons-material/Search';
 import InputBase from '@mui/material/InputBase';
 import Button from '@mui/material/Button';
@@ -42,56 +39,15 @@ import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
 import Autocomplete from '@mui/material/Autocomplete';
 import Title from './Title';
-import axios from "axios"
-import ImageList from '@mui/material/ImageList';
-import ImageListItem from "@mui/material/ImageListItem"
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
-
-//import ProductImage from './ProductImage';
-//import Products from './ProductsList';
-
+import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
+import parse from 'html-react-parser';
 import {auth} from "../firebase/firebase.config"
-
-import {signOut,onAuthStateChanged} from "firebase/auth"
-import { SettingsOverscanOutlined } from '@mui/icons-material';
-
-
-const itemData = [
-  {
-    img: 'https://images.unsplash.com/photo-1551963831-b3b1ca40c98e',
-    title: 'Breakfast',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1551782450-a2132b4ba21d',
-    title: 'Burger',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1522770179533-24471fcdba45',
-    title: 'Camera',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1444418776041-9c7e33cc5a9c',
-    title: 'Coffee',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1533827432537-70133748f5c8',
-    title: 'Hats',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62',
-    title: 'Honey',
-  },
-  {
-    img: 'https://images.unsplash.com/photo-1516802273409-68526ee1bdd6',
-    title: 'Basketball',
-  },
- 
-];
-
-
-const fetchURL = "https://api-rmwlookup.Soul2urfeet.com.pg/products";
+//import {signOut,onAuthStateChanged} from "firebase/auth"
+import { CloseOutlined } from '@mui/icons-material';
+import { color } from '@mui/system';
 
 const SearchIconWrapper = styled('div')(({ theme }) => ({
   padding: theme.spacing(0, 2),
@@ -145,14 +101,16 @@ function Copyright(props) {
   return (
     <Typography variant="body2" color="text.secondary" align="center" {...props}>
       {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
+      <Link color="inherit" href="https://www.soul2urfeet.com.pg/">
+        Soul 2 UR Feet
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
     </Typography>
   );
 }
+
+
 
 const drawerWidth = 240;
 
@@ -222,24 +180,40 @@ function DashboardContent() {
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const [productId, setProductId] = React.useState("id")
   const [productName,setProductName] = React.useState("Jervis Button Down Shirt")
-  const [productDescription,setProductDescription] = React.useState("description")
-  const [productColor,setProductColor] = React.useState("color")
+  const [productDescription,setProductDescription] = React.useState("<div>...</div>")
   const [productImage,setProductImage] = React.useState("https://images.pexels.com/lib/api/pexels.png")
   const [productCode, setProductCode] = React.useState("code")
   const [productPrice, setProductPrice] = React.useState("price")
-  const [foption, setFoption] = React.useState('');
+  const [foption, setFoption] = React.useState('pname');
   const [value, setValue] = React.useState('');
   const [inputValue, setInputValue] = React.useState('');
-
-
-  const [productLists, setProducts] = React.useState([])
-  const ProductsArrayList = []
+  const [productListsv2, setProductsv2] = React.useState([])
+  const [FilteredProduct, setFilteredProduct] = React.useState([])
   const [User, setUser] = React.useState([])
   const [open, setOpen] = React.useState(true);
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(15)
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [productsCatId,setProductCatId] = React.useState("")
+  const [count, setCount] = React.useState(1)
 
 
-  const [page, setPage] = React.useState(1);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const AutocompleteChange = (event)=>{
+    setValue(event.target.value)
+    console.log(value)
+    if(inputValue !== ''){
+      const filtproduct = productListsv2.filter((value)=> {
+        return (Object.values(value.name).join("").toString().toLowerCase().includes(inputValue.toString().toLowerCase()) || Object.values(value.sku).toLowerCase().includes(inputValue.toLowerCase()) ) //value.name === inputValue  || value.sku === inputValue 
+      })
+      setFilteredProduct(filtproduct)
+      setCount(filtproduct.length)
+      setRowsPerPage(filtproduct.length)
+
+    }else{
+      setFilteredProduct(productListsv2)
+      setCount(productListsv2.length)
+    }
+  }
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -247,112 +221,114 @@ function DashboardContent() {
   const handleChangeFoption = (event) => {
     setFoption(event.target.value);
   };
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-
-
-  const toggleDrawer = () => {
-    setOpen(!open);
-  };
-
-  //const [Opening, setOpening] = React.useState(false);
-  const [anchorEl, setAnchorEl] = React.useState(null);
- 
-
-  // const handleClick = (event) => {
-  //   setAnchorEl(event.currentTarget);
-  //   setOpening((previousOpen) => !previousOpen);
-  // };
-
+  const handleChangeRowsPerPage = (event) => {setRowsPerPage(parseInt(event.target.value, 10)); setPage(0);};
+  const toggleDrawer = () => {setOpen(!open);};
+  
   const canBeOpen = open && Boolean(anchorEl);
   const id = canBeOpen ? 'transition-popper' : undefined;
-
-  const handleOpenUserMenu = (event) => {
-    setAnchorElUser(event.currentTarget);
-  };
-const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
-  };
+  const handleOpenUserMenu = (event) => {setAnchorElUser(event.currentTarget)};
+  const handleCloseUserMenu = () => {setAnchorElUser(null)};
 
   function getProductID(event){
-    console.log("current target id", event.currentTarget.id)
     const ProductID = event.currentTarget.id
     const ProductName = event.currentTarget.cells[0].innerText
-    const ProductDesciption = event.currentTarget.cells[1].innerText
-    const ProductCode =  event.currentTarget.cells[2].innerText
-    const ProductColor  = event.currentTarget.cells[3].innerText
+    const ProductCode =  event.currentTarget.cells[1].innerText
     const ProductPrice  = event.currentTarget.cells[4].innerText
-    const ProductPicture  = event.currentTarget.cells[5].innerText
-   
+    const ProductDesciption = event.currentTarget.cells[5].innerText
+
+   const productIds = parseInt(ProductID )
+    productListsv2.forEach((product)=>{
+      try {
+        if (productIds == product.id){
+          console.log("product images if ",product.images[0].src)
+          return setProductImage(product.images[0].src)
+        } else {
+         
+          return  console.log("image not found")
+        }
+      } catch (error) {
+        console.log(error)
+        
+      }
+    })
   
     setProductId(ProductID)
     setProductName(ProductName)
     setProductDescription(ProductDesciption)
-    setProductColor(ProductColor)
     setProductCode(ProductCode)
     setProductPrice(ProductPrice)
-    setProductImage(ProductPicture)
   }
- const logout = async () => {
-  await signOut(auth);
-};
-
-
- function Buttons(){
-   return (
-   <Button onClick={logout}>Logout </Button>
-   )
+  const GetProductCatId =e=>{
+       setProductCatId(e.currentTarget.id )
+       console.log("firstList Clicked",productsCatId)
    }
-   function Profile(){
-    return (
-    <Button > User Profile </Button>
-    )
-    }
-  
+//  const logout = async () => {
+//   await signOut(auth);
+// };
+ 
+//  function Buttons(){
+//    return (
+//    <Button onClick={logout}>Logout </Button>
+//    )
+//    }
+//    function Profile(){
+//     return (
+//     <Button > User Profile </Button>
+//     )
+//     }
 
-const Users = [User, <Profile/>, <Buttons/>];
-
-onAuthStateChanged(auth, (currentUser) => {
-  try {
-    if (currentUser) {
-      setUser(currentUser.email);
-    }else{
-      console.log("user not existed")
-    }
-  } catch (error) {
-    console.log(error)
-  }
-  })
+// const Users = [User, <Profile/>, <Buttons/>];
+// onAuthStateChanged(auth, (currentUser) => {
+//   try {
+//     if (currentUser) {
+//       setUser(currentUser.email);
+//     }else{
+//       console.log("user not existed")
+//     }
+//   } catch (error) {
+//     console.log(error)
+//   }
+//   })
 
 React.useEffect(() => {
+  try {
+    const api = new WooCommerceRestApi({
+      url: "https://www.soul2urfeet.com.pg",
+      consumerKey: "ck_f764b6e861d84415f674fac56b2feb720d237e71",
+      consumerSecret: "cs_69d429a05a8d131da15bf8480b14b1014f32f76e",
+      version: "wc/v3"
+    });
+    // List products
+api.get("products", {
+  per_page: 70, // 20 products per page
+})
+  .then((response) => {
+    // Successful request
+    setProductsv2(response.data)
+    console.log("Response Status:", response.status);
+    console.log("Response Headers:", response.headers);
+    console.log("Response Data:", response.data);
+    console.log("Response Data: name", response.data.name);
+    console.log("Response Data: id", response.data.id);
+    console.log("Total of pages:", response.headers['x-wp-totalpages']);
+    console.log("Total of items:", response.headers['x-wp-total']);
+    setCount(parseInt(response.headers['x-wp-total']))
+  })
+  .catch((error) => {
+    // Invalid request, for 4xx and 5xx statuses
+    //console.log("Response Status:", error.response.status);
+    console.log("Response Headers:", error.response.headers);
+    console.log("Response Data:", error.response.data);
+  })
+  .finally(() => {
+    // Always executed.
+  });
 
-  const controller = new AbortController();
-    const signal = controller.signal;
-    try{
-       axios
-       .get(fetchURL,{params : {p : 0, s : 20}}, { signal: signal })
-       .then(function (products) {
-        console.log("response data",products.data);
 
-        
-        products.data.forEach(product =>{
-        const Singleproduct = Object.assign({}, product)
-        ProductsArrayList.push(Singleproduct)
-        
-      });
-      setProducts(ProductsArrayList)
-      })
-      .catch(function (error) {
-        console.log(error);
-      })
-    }catch(error){
-      console.log(error)
-    }
-  
-  
+  } catch (error) {
+    console.log(error)
+    
+  }
   
 }, []);
 
@@ -365,7 +341,7 @@ React.useEffect(() => {
           <AppBar position="absolute" open={open}>
             <Toolbar
               sx={{
-                pr: '24px', // keep right padding when drawer closed
+                pr: '24px',
               }}
             >
               <IconButton
@@ -389,7 +365,7 @@ React.useEffect(() => {
               >
                 RMW Lookup
               </Typography>
-              <Search>
+              {/* <Search>
 	            <SearchIconWrapper>
                   <SearchIcon />
               </SearchIconWrapper>
@@ -397,19 +373,19 @@ React.useEffect(() => {
               placeholder="Search…"
               inputProps={{ 'aria-label': 'search' }}
             />
-             </Search>
+             </Search> */}
 
-              <IconButton color="inherit">
+              {/* <IconButton color="inherit">
                 <Badge badgeContent={4} color="secondary">
                   <NotificationsIcon />
                 </Badge>
-              </IconButton> 
+              </IconButton>  */}
               <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
+            {/* <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar alt="Dean Peter" src='' />
               </IconButton>
-            </Tooltip>
+            </Tooltip> */}
             <Menu
               sx={{ mt: '45px' }}
               id="menu-appbar"
@@ -426,11 +402,11 @@ React.useEffect(() => {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu} 
             >
-              {Users.map((setting) => (
+              {/* {Users.map((setting) => (
                 <MenuItem key={setting} onClick={handleCloseUserMenu}>
                   <Typography textAlign="center">{setting}</Typography>
                 </MenuItem>
-              ))}
+              ))} */}
             </Menu>
           </Box>
                   
@@ -451,7 +427,7 @@ React.useEffect(() => {
             </Toolbar>
             <Divider />
             <List component="nav">
-              {mainListItems}
+              <MainListItems getFunc={GetProductCatId}/>
               <Divider sx={{ my: 1 }} />
               {secondaryListItems}
             </List>
@@ -481,7 +457,8 @@ React.useEffect(() => {
                       height: 240,
                     }}
                   >
-                  <Container >
+                    
+                  <Container sx = {{height : "max-content", overflow: "auto"}}>
                           <Typography
                             component="h6"
                             variant="h6"
@@ -498,23 +475,12 @@ React.useEffect(() => {
                            {`sales Price ( ${productPrice} )`}
                         </Typography>
                           <Typography variant="p" align="left" color="text.primary" component="p">
-                            Quickly build an effective pricing table for your potential customers with
-                            this layout. It&apos;s built with default MUI components with little
-                            customization.
+                        
+                          {parse(productDescription)}
+                          
                           </Typography>
-                            <ImageList sx={{ width: 500, height: 250 }} cols={7} rowHeight={50}>
-                          {itemData.map((item) => (
-                            <ImageListItem key={item.img}>
-                              <img
-                                src={`${item.img}?w=100&h=100&fit=crop&auto=format`}
-                                srcSet={`${item.img}?w=100&h=100&fit=crop&auto=format&dpr=2 2x`}
-                                alt={item.title}
-                                loading="lazy"
-                              />
-                            </ImageListItem>
-                          ))}
-                            </ImageList>
                   </Container>
+                 
                   </Paper>
                 </Grid>
                 <Grid item xs={12} md={4} lg={3}>
@@ -529,11 +495,10 @@ React.useEffect(() => {
                         <Card component="p" align="left" variant="p" >
                           <CardMedia
                           component="img"
-                          
                           height={200}
-                          // image={productImage}
+                          image={productImage}
                           maxWidth="lg"
-                          src={`${productImage}?w=100&h=100&fit=crop&auto=format`}
+                          src={`${productImage}?w=50&h=50&fit=crop&auto=format`}
                           alt="Chelsea-header"/>
                           {/* <CardHeader
                           title={productName}
@@ -566,19 +531,19 @@ React.useEffect(() => {
                     <Stack  sx={{ width: 257, marginRight : 0, height:20}}>
                         <Autocomplete
                           value={value}
-                          onChange={(event,newValue)=>{setValue(newValue)}}
+                          onChange={AutocompleteChange}
+                          autoSelect={true}
+                          clearOnEscape={true}
                           inputValue={inputValue}
                           onInputChange={(event,newinputValue)=>{setInputValue(newinputValue)}}
-                          freeSolo
                           id="free-solo-2-demo"
                           disableClearable
-                          options={productLists.map((product) => 
-
+                          options={productListsv2.map((product) => 
                             {
                               if (foption === "pname") {
-                                 return product[1]
+                                 return product.name
                               }else{
-                                return product[3]
+                                return product.sku
                               }}
                               )}
                           renderInput={(params) => (
@@ -592,8 +557,7 @@ React.useEffect(() => {
                             />
                           )}
                         />
-                      </Stack>
-                      
+                      </Stack>                 
                 </Grid>
                 <Grid item xs={12}>
                   <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column'}}>
@@ -606,48 +570,36 @@ React.useEffect(() => {
                           <TableHead>
                             <TableRow>
                               <TableCell>Product Name</TableCell>
-                              <TableCell>Product Description </TableCell>
-                              <TableCell>Product Code</TableCell>
-                              <TableCell>Product Color</TableCell>
-                              
-                              <TableCell align="right">Sales</TableCell>
-                            </TableRow>
-                            <TableRow>
-                          
+                              <TableCell>Product Code </TableCell>
+                              <TableCell>Stock Status</TableCell>
+                              <TableCell>Quantity In Stock</TableCell>
+                              <TableCell align="left">Sales</TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                             { (inputValue) ? (
-                             productLists.map((product) => {
-                               if (inputValue===product[1] || inputValue===product[3]) {
+                             { (inputValue.length > 1) ? ( 
+                             FilteredProduct.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((product) => {
                                 return (
-                                  <TableRow 
-                                  id={product[3]}
-                                  key={product[0]}
-                                  onClick={getProductID}
-                                  >
-                                    <TableCell>{product[1]}</TableCell>
-                                    <TableCell>{product[2]}</TableCell>
-                                    <TableCell>{product[3]}</TableCell>
-                                    <TableCell>{product[4]}</TableCell>
-                                    <TableCell align="right">{`K ${product[6]}`}</TableCell>
-                                    <TableCell sx = {{display:"none"}} align="right">{product[5]}</TableCell>
+                                  <TableRow  color="primary" id={product.id} key={product.sku} onClick={getProductID}>
+                                    <TableCell>{product.name}</TableCell>
+                                    <TableCell>{product.sku}</TableCell>
+                                    <TableCell>{product.stock_status}</TableCell>
+                                    <TableCell>{product.stock_quantity}</TableCell>
+                                    <TableCell>{`K ${product.price}`}</TableCell>
+                                    <TableCell sx = {{display:"none"}} >{product.description}</TableCell>
                                   </TableRow>
                                 )
-                               }
-                              }) ) : (
-                                  productLists.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((product) => {
-                                   return ( <TableRow 
-                                     id={product[3]}
-                                     key={product[0]}
-                                     onClick={getProductID}
-                                     >
-                                       <TableCell>{product[1]}</TableCell>
-                                       <TableCell>{product[2]}</TableCell>
-                                       <TableCell>{product[3]}</TableCell>
-                                       <TableCell>{product[4]}</TableCell>
-                                       <TableCell align="right">{`K ${product[6]}`}</TableCell>
-                                       <TableCell sx = {{display:"none"}} align="right">{product[5]}</TableCell>
+                              }) )
+                              : (
+                                productListsv2.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((product) => {
+                                   return ( 
+                                   <TableRow id={product.id} key={product.sku} onClick={getProductID}>
+                                       <TableCell>{product.name}</TableCell>
+                                       <TableCell>{product.sku}</TableCell>
+                                       <TableCell>{product.stock_status}</TableCell>
+                                       <TableCell>{product.stock_quantity}</TableCell>
+                                       <TableCell>{`K ${product.price}`}</TableCell>
+                                       <TableCell sx = {{display:"none"}}>{product.description}</TableCell>
                                      </TableRow>
                                     )
                                      } 
@@ -659,9 +611,9 @@ React.useEffect(() => {
                         </Table>
                         </TableContainer>
                         <TablePagination
-                          rowsPerPageOptions={[5, 10, 25]}
+                          rowsPerPageOptions={[15, 30, 35]}
                           component="div"
-                          count={productLists.length}
+                          count={count}
                           page={page}
                           onPageChange={handleChangePage}
                           rowsPerPage={rowsPerPage}

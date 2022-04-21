@@ -4,13 +4,13 @@ import importedComponent from 'react-imported-component';
 import Home from "./Clients/Home.js";
 
 //import Home from './Home';
-import HomeLogin  from './Login/LoginHome';
+//import HomeLogin  from './Login/LoginHome';
 import Loading from './user_profile/Loading';
-import LoginForm from "./Login/LoginForm"
-import SignIn from "./Login/signinForm"
-import {auth} from "./firebase/firebase.config"
-import {onAuthStateChanged} from "firebase/auth"
-import { result } from 'lodash';
+//import LoginForm from "./Login/LoginForm"
+//import SignIn from "./Login/signinForm"
+//import {auth} from "./firebase/firebase.config"
+//import {onAuthStateChanged} from "firebase/auth"
+//import { result } from 'lodash';
 
 const AsyncNoMatch = importedComponent(
   () => import(/* webpackChunkName:'NoMatch' */ './user_profile/NoMatch'),
@@ -20,20 +20,20 @@ const AsyncNoMatch = importedComponent(
 );
 
 const App = () => {
-const [isUserSignedIn, SetIsUserSignedIn] = useState(true);
+//const [isUserSignedIn, SetIsUserSignedIn] = useState(true);
 
-  onAuthStateChanged(auth,  (user)=>{
-    if (user){
-      SetIsUserSignedIn(true)
-    } else {
-      SetIsUserSignedIn(false)
-    }
+  // onAuthStateChanged(auth,  (user)=>{
+  //   if (user){
+  //     SetIsUserSignedIn(true)
+  //   } else {
+  //     SetIsUserSignedIn(false)
+  //   }
     
-  })
+  // })
 
-  try {
-    console.log(isUserSignedIn)
-    if (isUserSignedIn==true){
+ // try {
+    // console.log(isUserSignedIn)
+    // if (isUserSignedIn==true){
       return (
         <Router>
           <div>
@@ -43,37 +43,37 @@ const [isUserSignedIn, SetIsUserSignedIn] = useState(true);
           </div>
          </Router>
         )
-     }else{
-          return (
-            <Router>
-                <div>
-                <Switch>
-                  <Route exact path="/" component={HomeLogin} />
-                  <Route exact path="/login" component={LoginForm} />
-                  <Route exact path="/signin" component={SignIn} />
-                  <Route component={AsyncNoMatch} />
-                </Switch>
-                </div>  
-              </Router>
-        )
-      }
-  } catch (error) {
-    if (error){
-      return (
-        <Router>
-        <div>
-        <Switch>
-        <Route exact path="/" component={HomeLogin} />
-          <Route component={AsyncNoMatch} />
-        </Switch>
-        </div>
-    </Router>
+  //    }else{
+  //         return (
+  //           <Router>
+  //               <div>
+  //               <Switch>
+  //                 <Route exact path="/" component={Home} />
+  //                 {/* <Route exact path="/login" component={LoginForm} />
+  //                 <Route exact path="/signin" component={SignIn} /> */}
+  //                 <Route component={AsyncNoMatch} />
+  //               </Switch>
+  //               </div>  
+  //             </Router>
+  //       )
+  //     }
+  // } catch (error) {
+  //   if (error){
+  //     return (
+  //       <Router>
+  //       <div>
+  //       <Switch>
+  //       <Route exact path="/" component={Home} />
+  //         <Route component={AsyncNoMatch} />
+  //       </Switch>
+  //       </div>
+  //   </Router>
       
-      )
+  //     )
      
 
-    }
-  }
+  //   }
+  // }
    
 
 };
