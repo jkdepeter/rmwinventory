@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import { Switch, BrowserRouter as Router, Route } from 'react-router-dom';
 import importedComponent from 'react-imported-component';
-import Home from "./Clients/Home.js";
+import DashboardContent from "./clients/Home.js";
 
 //import Home from './Home';
 //import HomeLogin  from './Login/LoginHome';
@@ -38,7 +38,8 @@ const App = () => {
         <Router>
           <div>
           <Switch>
-            <Route component={Home} />
+            <Route component={DashboardContent} />
+            <Route component={AsyncNoMatch} />
           </Switch>
           </div>
          </Router>

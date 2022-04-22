@@ -47,6 +47,10 @@ const config = {
       },
     ],
   },
+  resolve : {
+    fallback:{ "stream": require.resolve("stream-browserify") }
+
+  },
   plugins: [
     new CleanWebpackPlugin(),
     new MiniCssExtractPlugin({
