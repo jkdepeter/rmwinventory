@@ -1,10 +1,10 @@
 import React, {useState} from 'react';
 import { Switch, BrowserRouter as Router, Route } from 'react-router-dom';
 import importedComponent from 'react-imported-component';
-import DashboardContent from "./clients/Home.js";
+//import DashboardContent from "./clients/Home.js";
 
 //import Home from './Home';
-//import HomeLogin  from './Login/LoginHome';
+import HomeLogin  from './Login/LoginHome';
 import Loading from './user_profile/Loading';
 //import LoginForm from "./Login/LoginForm"
 //import SignIn from "./Login/signinForm"
@@ -38,8 +38,8 @@ const App = () => {
         <Router>
           <div>
           <Switch>
-            <Route component={DashboardContent} />
-            <Route component={AsyncNoMatch} />
+            <Route component={HomeLogin} />
+            {/* <Route component={AsyncNoMatch} /> */}
           </Switch>
           </div>
          </Router>
